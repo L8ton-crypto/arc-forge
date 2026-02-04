@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+:root {
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #374151 transparent;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.kanban-column {
+  min-height: calc(100vh - 180px);
+}
+
+.card-drag {
+  cursor: grab;
+}
+
+.card-drag:active {
+  cursor: grabbing;
+}
+
+.drag-over {
+  background-color: rgba(59, 130, 246, 0.05);
+  border-color: rgba(59, 130, 246, 0.3);
+}
