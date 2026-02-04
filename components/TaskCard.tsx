@@ -52,12 +52,20 @@ export default function TaskCard({ task, onDragStart, onClick }: TaskCardProps) 
           </span>
         ))}
       </div>
-      {task.monetization && (
-        <div className="mt-2 text-[10px] text-emerald-400/80 flex items-center gap-1">
-          <span>💰</span>
-          <span>{task.monetization}</span>
-        </div>
-      )}
+      <div className="flex items-center justify-between mt-2">
+        {task.monetization && (
+          <div className="text-[10px] text-emerald-400/80 flex items-center gap-1">
+            <span>💰</span>
+            <span>{task.monetization}</span>
+          </div>
+        )}
+        {task.requirements && (
+          <div className="text-[10px] text-blue-400/80 flex items-center gap-1 ml-auto">
+            <span>📝</span>
+            <span>Reqs</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

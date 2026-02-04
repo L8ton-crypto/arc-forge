@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  /* Disable turbopack for build — SWC WASM fallback doesn't support it */
 };
 
 export default nextConfig;

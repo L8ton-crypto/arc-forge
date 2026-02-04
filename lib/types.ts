@@ -11,6 +11,7 @@ export interface Task {
   updatedAt: string;
   estimatedHours?: number;
   monetization?: string;
+  requirements?: string;
 }
 
 export interface Column {
@@ -27,3 +28,5 @@ export const COLUMN_CONFIG: { id: ColumnId; title: string; emoji: string }[] = [
   { id: "review", title: "Review", emoji: "🔍" },
   { id: "complete", title: "Complete", emoji: "✅" },
 ];
+
+export const COLUMN_ORDER: ColumnId[] = ["backlog", "requirements", "in-progress", "review", "complete"];
