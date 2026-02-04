@@ -128,19 +128,7 @@ export const initialColumns: Column[] = [
     id: "in-progress",
     title: "In Progress",
     emoji: "⚡",
-    tasks: [
-      {
-        id: "task-0",
-        title: "Arc Forge Kanban Board",
-        description: "Build the project tracking kanban board itself. Dark mode, drag-and-drop, persistent state, deployed to Vercel.",
-        priority: "high",
-        tags: ["internal", "tooling"],
-        createdAt: "2026-02-04",
-        updatedAt: "2026-02-04",
-        estimatedHours: 3,
-        monetization: "Internal tool",
-      },
-    ],
+    tasks: [],
   },
   {
     id: "review",
@@ -152,6 +140,18 @@ export const initialColumns: Column[] = [
     id: "complete",
     title: "Complete",
     emoji: "✅",
-    tasks: [],
+    tasks: [
+      {
+        id: "task-0",
+        title: "Arc Forge Kanban Board",
+        description: "Build the project tracking kanban board itself. Dark mode, drag-and-drop, persistent state, deployed to Vercel. Full CRUD, requirements field, search/filter, mobile move buttons.",
+        priority: "high",
+        tags: ["internal", "tooling"],
+        createdAt: "2026-02-04",
+        updatedAt: "2026-02-04",
+        estimatedHours: 3,
+        monetization: "Internal tool",
+      },
+    ],
   },
 ];
