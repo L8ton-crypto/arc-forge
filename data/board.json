@@ -1,0 +1,155 @@
+[
+  {
+    "id": "backlog",
+    "title": "Backlog",
+    "emoji": "📋",
+    "tasks": [
+      {
+        "id": "task-2",
+        "title": "StatusPulse",
+        "description": "Uptime monitoring dashboard. Users add URLs, get pinged when sites go down. Free tier: 3 monitors. Paid: unlimited + SMS alerts.",
+        "priority": "high",
+        "tags": ["saas", "devtools", "monitoring"],
+        "createdAt": "2026-02-04",
+        "updatedAt": "2026-02-04",
+        "estimatedHours": 12,
+        "monetization": "Recurring SaaS — £8/mo pro tier"
+      },
+      {
+        "id": "task-3",
+        "title": "AppianCheat",
+        "description": "Appian developer cheat sheet & reference app. Quick-reference for functions, expressions, design patterns. Leverage L8's domain expertise.",
+        "priority": "high",
+        "tags": ["devtools", "niche", "appian"],
+        "createdAt": "2026-02-04",
+        "updatedAt": "2026-02-04",
+        "estimatedHours": 6,
+        "monetization": "Freemium + ads, or £3/mo pro tier"
+      },
+      {
+        "id": "task-4",
+        "title": "QuickContract",
+        "description": "Simple contract/agreement builder with e-signature. Templates for freelancers and small businesses. Pay-per-use or subscription.",
+        "priority": "medium",
+        "tags": ["saas", "legal", "templates"],
+        "createdAt": "2026-02-04",
+        "updatedAt": "2026-02-04",
+        "estimatedHours": 16,
+        "monetization": "Pay-per-use £2/contract or £10/mo"
+      },
+      {
+        "id": "task-5",
+        "title": "PortfolioTracker",
+        "description": "Clean portfolio tracker with alerts, sell targets, and earnings calendar. Built from personal trading experience.",
+        "priority": "medium",
+        "tags": ["fintech", "trading", "alerts"],
+        "createdAt": "2026-02-04",
+        "updatedAt": "2026-02-04",
+        "estimatedHours": 10,
+        "monetization": "Freemium — premium alerts £5/mo"
+      },
+      {
+        "id": "task-6",
+        "title": "MeetingCost",
+        "description": "Live meeting cost calculator. Attendees × hourly rate × time. Browser extension or standalone. Viral potential.",
+        "priority": "medium",
+        "tags": ["productivity", "viral", "extension"],
+        "createdAt": "2026-02-04",
+        "updatedAt": "2026-02-04",
+        "estimatedHours": 4,
+        "monetization": "Freemium + enterprise tier"
+      },
+      {
+        "id": "task-7",
+        "title": "DomainFlip",
+        "description": "Domain name value estimator + marketplace finder. Aggregate data from multiple registrars. Affiliate revenue.",
+        "priority": "low",
+        "tags": ["affiliate", "domains", "tools"],
+        "createdAt": "2026-02-04",
+        "updatedAt": "2026-02-04",
+        "estimatedHours": 8,
+        "monetization": "Affiliate commissions from registrars"
+      },
+      {
+        "id": "task-8",
+        "title": "TimeBlock",
+        "description": "Pomodoro/time-blocking app with daily reports and streak tracking. Clean, focused, not bloated.",
+        "priority": "low",
+        "tags": ["productivity", "habits", "focus"],
+        "createdAt": "2026-02-04",
+        "updatedAt": "2026-02-04",
+        "estimatedHours": 6,
+        "monetization": "Freemium — £3/mo pro features"
+      },
+      {
+        "id": "task-9",
+        "title": "ChangelogHero",
+        "description": "Auto-generate beautiful changelogs from git commits. Developer tool with GitHub integration.",
+        "priority": "low",
+        "tags": ["devtools", "github", "automation"],
+        "createdAt": "2026-02-04",
+        "updatedAt": "2026-02-04",
+        "estimatedHours": 6,
+        "monetization": "Freemium SaaS — £5/mo per repo"
+      },
+      {
+        "id": "task-10",
+        "title": "WaitlistKit",
+        "description": "Pre-launch waitlist builder with referral mechanics. Every SaaS founder needs one. Embed on any site.",
+        "priority": "low",
+        "tags": ["saas", "marketing", "launch"],
+        "createdAt": "2026-02-04",
+        "updatedAt": "2026-02-04",
+        "estimatedHours": 8,
+        "monetization": "Freemium — £10/mo for custom branding"
+      }
+    ]
+  },
+  {
+    "id": "requirements",
+    "title": "Requirements",
+    "emoji": "📝",
+    "tasks": []
+  },
+  {
+    "id": "in-progress",
+    "title": "In Progress",
+    "emoji": "⚡",
+    "tasks": []
+  },
+  {
+    "id": "review",
+    "title": "Review",
+    "emoji": "🔍",
+    "tasks": []
+  },
+  {
+    "id": "complete",
+    "title": "Complete",
+    "emoji": "✅",
+    "tasks": [
+      {
+        "id": "task-0",
+        "title": "Arc Forge Kanban Board",
+        "description": "Build the project tracking kanban board itself. Dark mode, drag-and-drop, persistent state, deployed to Vercel. Full CRUD, requirements field, search/filter, mobile move buttons.",
+        "priority": "high",
+        "tags": ["internal", "tooling"],
+        "createdAt": "2026-02-04",
+        "updatedAt": "2026-02-04",
+        "estimatedHours": 3,
+        "monetization": "Internal tool"
+      },
+      {
+        "id": "task-1",
+        "title": "InvoiceForge",
+        "description": "Dead-simple invoice generator for freelancers. PDF export, client management, tax/discount, multi-currency (GBP/USD/EUR), status tracking, auto-numbering. Live at invoice-forge-flame.vercel.app",
+        "priority": "high",
+        "tags": ["saas", "fintech", "freemium"],
+        "createdAt": "2026-02-04",
+        "updatedAt": "2026-02-05",
+        "estimatedHours": 8,
+        "monetization": "Freemium SaaS — £5/mo pro tier"
+      }
+    ]
+  }
+]

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Column, ColumnId, Task, COLUMN_CONFIG, COLUMN_ORDER } from "@/lib/types";
 import { initialColumns } from "@/lib/initial-data";
 import TaskCard from "./TaskCard";
@@ -9,18 +9,46 @@ import AddTaskModal from "./AddTaskModal";
 
 const STORAGE_KEY = "arc-forge-board";
 
-function loadBoard(): Column[] {
-  if (typeof window === "undefined") return initialColumns;
+// Load from localStorage as fallback
+function loadFromStorage(): Column[] | null {
+  if (typeof window === "undefined") return null;
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) return JSON.parse(saved);
   } catch {}
-  return initialColumns;
+  return null;
 }
 
-function saveBoard(columns: Column[]) {
+// Save to localStorage as backup
+function saveToStorage(columns: Column[]) {
   if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(columns));
+}
+
+// Load from server API
+async function loadFromServer(): Promise<Column[] | null> {
+  try {
+    const res = await fetch("/api/board");
+    const data = await res.json();
+    return data.columns || null;
+  } catch {
+    return null;
+  }
+}
+
+// Save to server API
+async function saveToServer(columns: Column[]): Promise<boolean> {
+  try {
+    const res = await fetch("/api/board", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ columns }),
+    });
+    const data = await res.json();
+    return data.success;
+  } catch {
+    return false;
+  }
 }
 
 export default function KanbanBoard() {
@@ -31,16 +59,57 @@ export default function KanbanBoard() {
   const [selectedTaskCol, setSelectedTaskCol] = useState<ColumnId | null>(null);
   const [addingToColumn, setAddingToColumn] = useState<ColumnId | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [lastSaved, setLastSaved] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterPriority, setFilterPriority] = useState<string>("all");
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Load board on mount: server > localStorage > initial
   useEffect(() => {
-    setColumns(loadBoard());
-    setMounted(true);
+    async function load() {
+      const serverData = await loadFromServer();
+      if (serverData) {
+        setColumns(serverData);
+        saveToStorage(serverData); // sync to localStorage
+      } else {
+        const localData = loadFromStorage();
+        if (localData) {
+          setColumns(localData);
+          // Push local data to server if server was empty
+          saveToServer(localData);
+        }
+      }
+      setMounted(true);
+    }
+    load();
   }, []);
 
+  // Auto-save on every change (debounced 500ms)
   useEffect(() => {
-    if (mounted) saveBoard(columns);
+    if (!mounted) return;
+
+    // Save to localStorage immediately
+    saveToStorage(columns);
+
+    // Debounce server save
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(async () => {
+      setSyncing(true);
+      const success = await saveToServer(columns);
+      setSyncing(false);
+      if (success) {
+        setLastSaved(new Date().toLocaleTimeString());
+      }
+    }, 500);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
   }, [columns, mounted]);
 
   const handleDragStart = useCallback((e: React.DragEvent, taskId: string) => {
@@ -231,6 +300,14 @@ export default function KanbanBoard() {
                 <div className="flex items-center gap-1.5 text-gray-400">
                   <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                   {completedTasks}/{totalTasks} done
+                </div>
+                {/* Sync status */}
+                <div className="flex items-center gap-1.5 text-gray-500">
+                  {syncing ? (
+                    <span className="text-[10px]">💾 Saving...</span>
+                  ) : lastSaved ? (
+                    <span className="text-[10px]">✓ {lastSaved}</span>
+                  ) : null}
                 </div>
               </div>
             </div>
