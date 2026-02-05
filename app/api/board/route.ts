@@ -2,17 +2,33 @@ import { NextRequest, NextResponse } from "next/server";
 import { getBoard, saveBoard } from "@/lib/db";
 
 export async function GET() {
-  const columns = await getBoard();
-  return NextResponse.json({ columns });
+  try {
+    const columns = await getBoard();
+    return NextResponse.json({ columns });
+  } catch (error) {
+    console.error("GET /api/board error:", error);
+    return NextResponse.json({ columns: null, error: String(error) }, { status: 500 });
+  }
 }
 
 export async function POST(request: NextRequest) {
-  const { columns } = await request.json();
-  const success = await saveBoard(columns);
-  
-  if (success) {
-    return NextResponse.json({ success: true });
-  } else {
-    return NextResponse.json({ success: false, error: "Failed to save" }, { status: 500 });
+  try {
+    const body = await request.json();
+    const { columns } = body;
+    
+    if (!columns || !Array.isArray(columns)) {
+      return NextResponse.json({ success: false, error: "Invalid columns data" }, { status: 400 });
+    }
+    
+    const success = await saveBoard(columns);
+    
+    if (success) {
+      return NextResponse.json({ success: true });
+    } else {
+      return NextResponse.json({ success: false, error: "Database write failed" }, { status: 500 });
+    }
+  } catch (error) {
+    console.error("POST /api/board error:", error);
+    return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
   }
 }
