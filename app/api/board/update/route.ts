@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBoard, saveBoard } from "@/lib/db";
+import { isAuthorized } from "@/lib/auth";
 
 interface Task {
   id: string;
@@ -17,6 +18,10 @@ interface Column {
 // Updates specific fields of a task without moving it
 
 export async function POST(request: NextRequest) {
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const { taskId, updates } = await request.json();
     

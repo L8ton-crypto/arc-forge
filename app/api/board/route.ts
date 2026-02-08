@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBoard, saveBoard } from "@/lib/db";
+import { isAuthorized } from "@/lib/auth";
 
 export async function GET() {
   try {
@@ -12,6 +13,11 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // Require authentication for writes
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const { columns } = body;

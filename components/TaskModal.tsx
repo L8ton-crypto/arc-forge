@@ -10,9 +10,10 @@ interface TaskModalProps {
   onSave: (task: Task) => void;
   onDelete: (taskId: string) => void;
   onMove: (taskId: string, targetCol: ColumnId) => void;
+  canEdit?: boolean;
 }
 
-export default function TaskModal({ task, columnId, onClose, onSave, onDelete, onMove }: TaskModalProps) {
+export default function TaskModal({ task, columnId, onClose, onSave, onDelete, onMove, canEdit = true }: TaskModalProps) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     title: "",
@@ -232,70 +233,74 @@ export default function TaskModal({ task, columnId, onClose, onSave, onDelete, o
           </div>
         ) : null}
 
-        {/* Move buttons (mobile-friendly) */}
-        <div className="flex gap-2 mb-4">
-          {canMoveLeft && (
-            <button
-              onClick={() => {
-                onMove(task.id, COLUMN_ORDER[currentIdx - 1]);
-                onClose();
-              }}
-              className="flex-1 py-2 px-3 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors flex items-center justify-center gap-1.5"
-            >
-              ← {COLUMN_CONFIG[currentIdx - 1]?.emoji} {COLUMN_CONFIG[currentIdx - 1]?.title}
-            </button>
-          )}
-          {canMoveRight && (
-            <button
-              onClick={() => {
-                onMove(task.id, COLUMN_ORDER[currentIdx + 1]);
-                onClose();
-              }}
-              className="flex-1 py-2 px-3 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors flex items-center justify-center gap-1.5"
-            >
-              {COLUMN_CONFIG[currentIdx + 1]?.emoji} {COLUMN_CONFIG[currentIdx + 1]?.title} →
-            </button>
-          )}
-        </div>
-
-        {/* Action buttons */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-800">
-          <div className="flex gap-2">
-            {editing ? (
-              <>
-                <button
-                  onClick={handleSave}
-                  className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => { setEditing(false); setConfirmDelete(false); }}
-                  className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm transition-colors"
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
+        {/* Move buttons (mobile-friendly) - only when can edit */}
+        {canEdit && (
+          <div className="flex gap-2 mb-4">
+            {canMoveLeft && (
               <button
-                onClick={() => setEditing(true)}
-                className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm transition-colors"
+                onClick={() => {
+                  onMove(task.id, COLUMN_ORDER[currentIdx - 1]);
+                  onClose();
+                }}
+                className="flex-1 py-2 px-3 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors flex items-center justify-center gap-1.5"
               >
-                ✏️ Edit
+                ← {COLUMN_CONFIG[currentIdx - 1]?.emoji} {COLUMN_CONFIG[currentIdx - 1]?.title}
+              </button>
+            )}
+            {canMoveRight && (
+              <button
+                onClick={() => {
+                  onMove(task.id, COLUMN_ORDER[currentIdx + 1]);
+                  onClose();
+                }}
+                className="flex-1 py-2 px-3 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors flex items-center justify-center gap-1.5"
+              >
+                {COLUMN_CONFIG[currentIdx + 1]?.emoji} {COLUMN_CONFIG[currentIdx + 1]?.title} →
               </button>
             )}
           </div>
-          <button
-            onClick={handleDelete}
-            className={`px-4 py-2 rounded-lg text-sm transition-colors ${
-              confirmDelete
-                ? "bg-red-600 hover:bg-red-500 text-white font-medium"
-                : "bg-gray-800 hover:bg-gray-700 text-red-400"
-            }`}
-          >
-            {confirmDelete ? "Confirm Delete" : "🗑️ Delete"}
-          </button>
-        </div>
+        )}
+
+        {/* Action buttons - only show edit/delete when canEdit */}
+        {canEdit && (
+          <div className="flex items-center justify-between pt-3 border-t border-gray-800">
+            <div className="flex gap-2">
+              {editing ? (
+                <>
+                  <button
+                    onClick={handleSave}
+                    className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => { setEditing(false); setConfirmDelete(false); }}
+                    className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setEditing(true)}
+                  className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm transition-colors"
+                >
+                  ✏️ Edit
+                </button>
+              )}
+            </div>
+            <button
+              onClick={handleDelete}
+              className={`px-4 py-2 rounded-lg text-sm transition-colors ${
+                confirmDelete
+                  ? "bg-red-600 hover:bg-red-500 text-white font-medium"
+                  : "bg-gray-800 hover:bg-gray-700 text-red-400"
+              }`}
+            >
+              {confirmDelete ? "Confirm Delete" : "🗑️ Delete"}
+            </button>
+          </div>
+        )}
 
         {/* Metadata */}
         <div className="mt-3 text-[10px] text-gray-600">

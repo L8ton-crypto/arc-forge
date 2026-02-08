@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBoard, saveBoard } from "@/lib/db";
+import { isAuthorized } from "@/lib/auth";
 
 interface Task {
   id?: string;
@@ -23,6 +24,10 @@ interface Column {
 // Adds a new task to the specified column (default: backlog)
 
 export async function POST(request: NextRequest) {
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const { task, column = "backlog" } = await request.json();
     

@@ -6,6 +6,8 @@ import { initialColumns } from "@/lib/initial-data";
 import TaskCard from "./TaskCard";
 import TaskModal from "./TaskModal";
 import AddTaskModal from "./AddTaskModal";
+import UnlockModal from "./UnlockModal";
+import { useAuth } from "./AuthContext";
 
 const STORAGE_KEY = "arc-forge-board";
 
@@ -36,12 +38,17 @@ async function loadFromServer(): Promise<Column[] | null> {
   }
 }
 
-// Save to server API
-async function saveToServer(columns: Column[]): Promise<boolean> {
+// Save to server API (requires session token)
+async function saveToServer(columns: Column[], sessionToken: string | null): Promise<boolean> {
+  if (!sessionToken) return false;
+  
   try {
     const res = await fetch("/api/board", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "X-Session-Token": sessionToken,
+      },
       body: JSON.stringify({ columns }),
     });
     const data = await res.json();
@@ -52,6 +59,7 @@ async function saveToServer(columns: Column[]): Promise<boolean> {
 }
 
 export default function KanbanBoard() {
+  const { isAuthenticated, isLoading: authLoading, logout, getSessionToken } = useAuth();
   const [columns, setColumns] = useState<Column[]>(initialColumns);
   const [draggedTask, setDraggedTask] = useState<string | null>(null);
   const [dragOverCol, setDragOverCol] = useState<ColumnId | null>(null);
@@ -63,6 +71,7 @@ export default function KanbanBoard() {
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterPriority, setFilterPriority] = useState<string>("all");
+  const [showUnlock, setShowUnlock] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load board on mount: server > localStorage > initial
@@ -76,8 +85,7 @@ export default function KanbanBoard() {
         const localData = loadFromStorage();
         if (localData) {
           setColumns(localData);
-          // Push local data to server if server was empty
-          saveToServer(localData);
+          // Note: local data won't sync to server until user is authenticated
         }
       }
       setMounted(true);
@@ -85,9 +93,9 @@ export default function KanbanBoard() {
     load();
   }, []);
 
-  // Auto-save on every change (debounced 500ms)
+  // Auto-save on every change (debounced 500ms) - only when authenticated
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || !isAuthenticated) return;
 
     // Save to localStorage immediately
     saveToStorage(columns);
@@ -98,7 +106,7 @@ export default function KanbanBoard() {
     }
     saveTimeoutRef.current = setTimeout(async () => {
       setSyncing(true);
-      const success = await saveToServer(columns);
+      const success = await saveToServer(columns, getSessionToken());
       setSyncing(false);
       if (success) {
         setLastSaved(new Date().toLocaleTimeString());
@@ -110,13 +118,17 @@ export default function KanbanBoard() {
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [columns, mounted]);
+  }, [columns, mounted, isAuthenticated, getSessionToken]);
 
   const handleDragStart = useCallback((e: React.DragEvent, taskId: string) => {
+    if (!isAuthenticated) {
+      e.preventDefault();
+      return;
+    }
     setDraggedTask(taskId);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", taskId);
-  }, []);
+  }, [isAuthenticated]);
 
   const handleDragOver = useCallback((e: React.DragEvent, colId: ColumnId) => {
     e.preventDefault();
@@ -133,7 +145,7 @@ export default function KanbanBoard() {
       e.preventDefault();
       setDragOverCol(null);
 
-      if (!draggedTask) return;
+      if (!draggedTask || !isAuthenticated) return;
 
       setColumns((prev) => {
         let task: Task | null = null;
@@ -157,7 +169,7 @@ export default function KanbanBoard() {
 
       setDraggedTask(null);
     },
-    [draggedTask]
+    [draggedTask, isAuthenticated]
   );
 
   // Task CRUD
@@ -309,6 +321,24 @@ export default function KanbanBoard() {
                     <span className="text-[10px]">✓ {lastSaved}</span>
                   ) : null}
                 </div>
+                {/* Auth button */}
+                {!authLoading && (
+                  isAuthenticated ? (
+                    <button
+                      onClick={logout}
+                      className="px-2 py-1 text-[11px] bg-emerald-600/20 text-emerald-400 border border-emerald-600/30 rounded-md hover:bg-emerald-600/30 transition-colors"
+                    >
+                      🔓 Editing
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setShowUnlock(true)}
+                      className="px-2 py-1 text-[11px] bg-gray-800 text-gray-400 border border-gray-700 rounded-md hover:bg-gray-700 hover:text-gray-300 transition-colors"
+                    >
+                      🔒 View Only
+                    </button>
+                  )
+                )}
               </div>
             </div>
           </div>
@@ -346,13 +376,15 @@ export default function KanbanBoard() {
                       <span className="text-[11px] text-gray-500 bg-gray-800/60 px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                         {col.tasks.length}
                       </span>
-                      <button
-                        onClick={() => setAddingToColumn(col.id)}
-                        className="w-5 h-5 rounded flex items-center justify-center text-gray-600 hover:text-blue-400 hover:bg-gray-800 transition-colors text-sm"
-                        title={`Add task to ${config.title}`}
-                      >
-                        +
-                      </button>
+                      {isAuthenticated && (
+                        <button
+                          onClick={() => setAddingToColumn(col.id)}
+                          className="w-5 h-5 rounded flex items-center justify-center text-gray-600 hover:text-blue-400 hover:bg-gray-800 transition-colors text-sm"
+                          title={`Add task to ${config.title}`}
+                        >
+                          +
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -392,15 +424,21 @@ export default function KanbanBoard() {
         onSave={handleSaveTask}
         onDelete={handleDeleteTask}
         onMove={handleMoveTask}
+        canEdit={isAuthenticated}
       />
 
       {/* Add task modal */}
-      {addingToColumn && (
+      {addingToColumn && isAuthenticated && (
         <AddTaskModal
           targetColumn={addingToColumn}
           onClose={() => setAddingToColumn(null)}
           onAdd={handleAddTask}
         />
+      )}
+
+      {/* Unlock modal */}
+      {showUnlock && (
+        <UnlockModal onClose={() => setShowUnlock(false)} />
       )}
     </div>
   );
