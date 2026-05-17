@@ -1,103 +1,29 @@
-import { getBoard } from "@/lib/db";
-import { AUDIENCE_CONFIG, Audience, ColumnId, Task } from "@/lib/types";
+import { AUDIENCE_CONFIG } from "@/lib/types";
+import {
+  fetchFlatTasks,
+  computePipelineStats,
+  projectShipped,
+  projectInProgress,
+  PipelineStats,
+  ShippedItem,
+  InProgressItem,
+} from "@/lib/public-data";
 
 export const revalidate = 300;
 
-interface Column {
-  id: ColumnId;
-  title: string;
-  tasks: Task[];
-}
-
 interface PublicData {
-  stats: {
-    totalShipped: number;
-    shippedThisWeek: number;
-    shippedThisMonth: number;
-    activeBuilds: number;
-    backlogSize: number;
-    lastShipDate: string | null;
-    lastShipDaysAgo: number | null;
-  };
-  shipped: Array<{
-    id: string;
-    title: string;
-    description: string;
-    audience?: Audience;
-    liveUrl?: string;
-    repoUrl?: string;
-    shippedAt?: string;
-    tags: string[];
-  }>;
-  inProgress: Array<{
-    id: string;
-    title: string;
-    audience?: Audience;
-    oneNightScope?: string;
-    tags: string[];
-  }>;
+  stats: PipelineStats;
+  shipped: ShippedItem[];
+  inProgress: InProgressItem[];
 }
 
 async function loadPublicData(): Promise<PublicData | null> {
-  const columns = (await getBoard()) as Column[] | null;
-  if (!columns) return null;
-
-  const byId = (id: ColumnId) => columns.find((c) => c.id === id)?.tasks ?? [];
-  const completeTasks = byId("complete");
-  const inProgressTasks = byId("in-progress");
-  const reviewTasks = byId("review");
-  const backlogTasks = byId("backlog");
-
-  const now = Date.now();
-  const ONE_DAY = 24 * 60 * 60 * 1000;
-  const inWindow = (iso: string | undefined, days: number) => {
-    if (!iso) return false;
-    const t = new Date(iso).getTime();
-    if (Number.isNaN(t)) return false;
-    return now - t <= days * ONE_DAY;
-  };
-
-  const shippedThisWeek = completeTasks.filter((t) => inWindow(t.shippedAt || t.updatedAt, 7)).length;
-  const shippedThisMonth = completeTasks.filter((t) => inWindow(t.shippedAt || t.updatedAt, 30)).length;
-
-  const sortedShipped = [...completeTasks].sort((a, b) => {
-    const aT = new Date(a.shippedAt || a.updatedAt).getTime();
-    const bT = new Date(b.shippedAt || b.updatedAt).getTime();
-    return bT - aT;
-  });
-
-  const lastShipIso = sortedShipped[0]?.shippedAt || sortedShipped[0]?.updatedAt || null;
-  const lastShipDaysAgo = lastShipIso
-    ? Math.floor((now - new Date(lastShipIso).getTime()) / ONE_DAY)
-    : null;
-
+  const flat = await fetchFlatTasks();
+  if (!flat) return null;
   return {
-    stats: {
-      totalShipped: completeTasks.length,
-      shippedThisWeek,
-      shippedThisMonth,
-      activeBuilds: inProgressTasks.length + reviewTasks.length,
-      backlogSize: backlogTasks.length,
-      lastShipDate: lastShipIso,
-      lastShipDaysAgo,
-    },
-    shipped: sortedShipped.slice(0, 50).map((t) => ({
-      id: t.id,
-      title: t.title,
-      description: t.description,
-      audience: t.audience,
-      liveUrl: t.liveUrl,
-      repoUrl: t.repoUrl,
-      shippedAt: t.shippedAt || t.updatedAt,
-      tags: t.tags || [],
-    })),
-    inProgress: [...inProgressTasks, ...reviewTasks].slice(0, 8).map((t) => ({
-      id: t.id,
-      title: t.title,
-      audience: t.audience,
-      oneNightScope: t.oneNightScope,
-      tags: t.tags || [],
-    })),
+    stats: computePipelineStats(flat),
+    shipped: projectShipped(flat, 50),
+    inProgress: projectInProgress(flat, 8),
   };
 }
 
