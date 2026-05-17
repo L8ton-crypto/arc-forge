@@ -182,6 +182,30 @@ export function projectInProgress(flat: FlatTask[], limit = 8): InProgressItem[]
   }));
 }
 
+export interface EmbedSummary {
+  totalShipped: number;
+  shippedThisWeek: number;
+  activeBuilds: number;
+  backlogSize: number;
+  lastShipDaysAgo: number | null;
+  recentTitles: string[];
+}
+
+export function computeEmbedSummary(flat: FlatTask[]): EmbedSummary {
+  const stats = computePipelineStats(flat);
+  const recent = projectShipped(flat, 3).map((s) =>
+    s.title.length > 36 ? s.title.slice(0, 33) + "..." : s.title
+  );
+  return {
+    totalShipped: stats.totalShipped,
+    shippedThisWeek: stats.shippedThisWeek,
+    activeBuilds: stats.activeBuilds,
+    backlogSize: stats.backlogSize,
+    lastShipDaysAgo: stats.lastShipDaysAgo,
+    recentTitles: recent,
+  };
+}
+
 export function projectWeeklyLineage(flat: FlatTask[], maxWeeks = 26): WeekBucket[] {
   const currentYear = new Date().getUTCFullYear();
   const bucketMap = new Map<number, WeekBucket>();

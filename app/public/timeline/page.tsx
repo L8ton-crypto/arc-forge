@@ -1,7 +1,25 @@
+import type { Metadata } from "next";
 import { AUDIENCE_CONFIG, ColumnId } from "@/lib/types";
 import { fetchFlatTasks, projectWeeklyLineage, WeekBucket } from "@/lib/public-data";
 
 export const revalidate = 300;
+
+export const metadata: Metadata = {
+  title: "L8 — Pipeline Timeline (live)",
+  description: "Research-to-ship lineage, week by week. Every card grouped by Sunday trend brief.",
+  openGraph: {
+    title: "L8 — Pipeline Timeline",
+    description: "Research-to-ship lineage, week by week. Every card grouped by Sunday trend brief.",
+    type: "website",
+    url: "https://arc-forge-rho.vercel.app/public/timeline",
+    siteName: "Arc Forge",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "L8 — Pipeline Timeline",
+    description: "Research-to-ship lineage, week by week.",
+  },
+};
 
 interface TimelineData {
   weeks: WeekBucket[];

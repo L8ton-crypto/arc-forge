@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { AUDIENCE_CONFIG } from "@/lib/types";
 import {
   fetchFlatTasks,
@@ -10,6 +11,23 @@ import {
 } from "@/lib/public-data";
 
 export const revalidate = 300;
+
+export const metadata: Metadata = {
+  title: "L8 — Autonomous Pipeline (live)",
+  description: "91+ apps shipped via autonomous overnight pipeline. Live links to every one.",
+  openGraph: {
+    title: "L8 — Autonomous Pipeline",
+    description: "Apps shipped via autonomous overnight pipeline. Live receipts.",
+    type: "website",
+    url: "https://arc-forge-rho.vercel.app/public",
+    siteName: "Arc Forge",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "L8 — Autonomous Pipeline",
+    description: "Apps shipped via autonomous overnight pipeline.",
+  },
+};
 
 interface PublicData {
   stats: PipelineStats;
