@@ -216,6 +216,9 @@ export default async function PublicDashboard() {
             <h2 className="text-xs uppercase tracking-[0.2em] text-gray-500 font-medium">
               Shipped {stats.totalShipped > 50 && <span className="normal-case tracking-normal">— showing last 50</span>}
             </h2>
+            <a href="/public/timeline" className="text-xs text-blue-400 hover:text-blue-300">
+              View timeline by week →
+            </a>
           </div>
           {shipped.length === 0 ? (
             <div className="text-gray-500 text-sm italic">
@@ -291,6 +294,8 @@ export default async function PublicDashboard() {
           </div>
           <div className="flex gap-4">
             <a href="/" className="hover:text-gray-300">Kanban</a>
+            <span className="text-gray-700">|</span>
+            <a href="/public/timeline" className="hover:text-gray-300">Timeline</a>
             <span className="text-gray-700">|</span>
             <a href="https://github.com/L8ton-crypto" target="_blank" rel="noopener noreferrer" className="hover:text-gray-300">
               GitHub
