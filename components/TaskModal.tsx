@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Task, Priority, ColumnId, COLUMN_CONFIG, COLUMN_ORDER } from "@/lib/types";
+import { Task, Priority, ColumnId, COLUMN_CONFIG, COLUMN_ORDER, Audience, AUDIENCE_CONFIG } from "@/lib/types";
 
 interface TaskModalProps {
   task: Task | null;
@@ -23,8 +23,16 @@ export default function TaskModal({ task, columnId, onClose, onSave, onDelete, o
     estimatedHours: "",
     monetization: "",
     requirements: "",
+    audience: "" as "" | Audience,
+    liveUrl: "",
+    repoUrl: "",
+    oneNightScope: "",
+    weekTwoScope: "",
+    competitorCheck: "",
+    sourceSignal: "",
   });
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showPipeline, setShowPipeline] = useState(false);
 
   useEffect(() => {
     if (task) {
@@ -36,9 +44,20 @@ export default function TaskModal({ task, columnId, onClose, onSave, onDelete, o
         estimatedHours: task.estimatedHours?.toString() || "",
         monetization: task.monetization || "",
         requirements: task.requirements || "",
+        audience: task.audience || "",
+        liveUrl: task.liveUrl || "",
+        repoUrl: task.repoUrl || "",
+        oneNightScope: task.oneNightScope || "",
+        weekTwoScope: task.weekTwoScope || "",
+        competitorCheck: task.competitorCheck || "",
+        sourceSignal: task.sourceSignal || "",
       });
       setEditing(false);
       setConfirmDelete(false);
+      setShowPipeline(
+        !!(task.audience || task.liveUrl || task.repoUrl || task.oneNightScope ||
+           task.weekTwoScope || task.competitorCheck || task.sourceSignal || task.shippedAt)
+      );
     }
   }, [task]);
 
@@ -55,6 +74,13 @@ export default function TaskModal({ task, columnId, onClose, onSave, onDelete, o
       estimatedHours: form.estimatedHours ? parseFloat(form.estimatedHours) : undefined,
       monetization: form.monetization.trim() || undefined,
       requirements: form.requirements.trim() || undefined,
+      audience: form.audience || undefined,
+      liveUrl: form.liveUrl.trim() || undefined,
+      repoUrl: form.repoUrl.trim() || undefined,
+      oneNightScope: form.oneNightScope.trim() || undefined,
+      weekTwoScope: form.weekTwoScope.trim() || undefined,
+      competitorCheck: form.competitorCheck.trim() || undefined,
+      sourceSignal: form.sourceSignal.trim() || undefined,
       updatedAt: today,
     });
     setEditing(false);
@@ -232,6 +258,180 @@ export default function TaskModal({ task, columnId, onClose, onSave, onDelete, o
             <div className="text-sm text-emerald-300">{task.monetization}</div>
           </div>
         ) : null}
+
+        {/* Pipeline section - collapsible. Auto-expands when any pipeline field is set. */}
+        <div className="mb-4 border-t border-gray-800 pt-3">
+          <button
+            type="button"
+            onClick={() => setShowPipeline(!showPipeline)}
+            className="w-full flex items-center justify-between text-[11px] uppercase tracking-wider text-gray-500 hover:text-gray-300 transition-colors mb-2"
+          >
+            <span>🔧 Pipeline fields</span>
+            <span className="text-gray-600">{showPipeline ? "−" : "+"}</span>
+          </button>
+
+          {showPipeline && (
+            <div className="space-y-3 bg-gray-800/30 rounded-lg p-3 border border-gray-800">
+              <div>
+                <div className={labelClass}>Audience</div>
+                {editing ? (
+                  <select
+                    value={form.audience}
+                    onChange={(e) => setForm({ ...form, audience: e.target.value as "" | Audience })}
+                    className={inputClass}
+                  >
+                    <option value="">— none —</option>
+                    <option value="appian">Appian (day-job audience)</option>
+                    <option value="finance">Finance (retail trading)</option>
+                    <option value="consumer">Consumer</option>
+                    <option value="enterprise">Enterprise</option>
+                  </select>
+                ) : task.audience ? (
+                  (() => {
+                    const a = AUDIENCE_CONFIG[task.audience];
+                    return (
+                      <span
+                        className={`inline-block text-[11px] px-2 py-0.5 rounded-full border ${a.bg} ${a.text} ${a.border} font-medium`}
+                      >
+                        {a.label}
+                      </span>
+                    );
+                  })()
+                ) : (
+                  <span className="text-xs text-gray-600 italic">— not set —</span>
+                )}
+              </div>
+
+              <div>
+                <div className={labelClass}>🌙 One-night MVP scope</div>
+                {editing ? (
+                  <textarea
+                    value={form.oneNightScope}
+                    onChange={(e) => setForm({ ...form, oneNightScope: e.target.value })}
+                    className={`${inputClass} min-h-[60px] resize-y`}
+                    placeholder="Exactly what ships in 8 hours - one page, one endpoint, one feature"
+                  />
+                ) : task.oneNightScope ? (
+                  <p className="text-sm text-gray-300 whitespace-pre-wrap">{task.oneNightScope}</p>
+                ) : (
+                  <span className="text-xs text-gray-600 italic">— not set —</span>
+                )}
+              </div>
+
+              <div>
+                <div className={labelClass}>📅 Week-two scope</div>
+                {editing ? (
+                  <textarea
+                    value={form.weekTwoScope}
+                    onChange={(e) => setForm({ ...form, weekTwoScope: e.target.value })}
+                    className={`${inputClass} min-h-[50px] resize-y`}
+                    placeholder="What gets added in iteration 2 if MVP gets traction"
+                  />
+                ) : task.weekTwoScope ? (
+                  <p className="text-sm text-gray-300 whitespace-pre-wrap">{task.weekTwoScope}</p>
+                ) : (
+                  <span className="text-xs text-gray-600 italic">— not set —</span>
+                )}
+              </div>
+
+              <div>
+                <div className={labelClass}>🔍 Competitor check</div>
+                {editing ? (
+                  <textarea
+                    value={form.competitorCheck}
+                    onChange={(e) => setForm({ ...form, competitorCheck: e.target.value })}
+                    className={`${inputClass} min-h-[50px] resize-y`}
+                    placeholder="Found X variants on Product Hunt or GitHub. We differentiate by Y."
+                  />
+                ) : task.competitorCheck ? (
+                  <p className="text-sm text-gray-300 whitespace-pre-wrap">{task.competitorCheck}</p>
+                ) : (
+                  <span className="text-xs text-gray-600 italic">— not set —</span>
+                )}
+              </div>
+
+              <div>
+                <div className={labelClass}>📡 Source signal</div>
+                {editing ? (
+                  <input
+                    value={form.sourceSignal}
+                    onChange={(e) => setForm({ ...form, sourceSignal: e.target.value })}
+                    className={inputClass}
+                    placeholder="URL to forum thread, news story, or friction cluster"
+                  />
+                ) : task.sourceSignal ? (
+                  /^https?:\/\//.test(task.sourceSignal) ? (
+                    <a
+                      href={task.sourceSignal}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-400 hover:text-blue-300 underline break-all"
+                    >
+                      {task.sourceSignal}
+                    </a>
+                  ) : (
+                    <p className="text-sm text-gray-300 whitespace-pre-wrap">{task.sourceSignal}</p>
+                  )
+                ) : (
+                  <span className="text-xs text-gray-600 italic">— not set —</span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <div className={labelClass}>🟢 Live URL</div>
+                  {editing ? (
+                    <input
+                      value={form.liveUrl}
+                      onChange={(e) => setForm({ ...form, liveUrl: e.target.value })}
+                      className={inputClass}
+                      placeholder="https://app.vercel.app"
+                    />
+                  ) : task.liveUrl ? (
+                    <a
+                      href={task.liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-emerald-300 hover:text-emerald-200 underline break-all"
+                    >
+                      {task.liveUrl}
+                    </a>
+                  ) : (
+                    <span className="text-xs text-gray-600 italic">— not set —</span>
+                  )}
+                </div>
+                <div>
+                  <div className={labelClass}>📦 Repo URL</div>
+                  {editing ? (
+                    <input
+                      value={form.repoUrl}
+                      onChange={(e) => setForm({ ...form, repoUrl: e.target.value })}
+                      className={inputClass}
+                      placeholder="https://github.com/..."
+                    />
+                  ) : task.repoUrl ? (
+                    <a
+                      href={task.repoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-400 hover:text-blue-300 underline break-all"
+                    >
+                      {task.repoUrl}
+                    </a>
+                  ) : (
+                    <span className="text-xs text-gray-600 italic">— not set —</span>
+                  )}
+                </div>
+              </div>
+
+              {task.shippedAt && (
+                <div className="text-[11px] text-emerald-400/70 pt-1 border-t border-gray-800/60">
+                  🚢 Shipped {new Date(task.shippedAt).toLocaleString()}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Move buttons (mobile-friendly) - only when can edit */}
         {canEdit && (

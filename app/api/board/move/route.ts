@@ -6,6 +6,7 @@ interface Task {
   id: string;
   title: string;
   updatedAt?: string;
+  shippedAt?: string;
   [key: string]: unknown;
 }
 
@@ -78,7 +79,12 @@ export async function POST(request: NextRequest) {
     
     // Update task timestamp
     task.updatedAt = new Date().toISOString().split('T')[0];
-    
+
+    // Auto-stamp shippedAt when card lands in `complete` for the first time.
+    if (toColumn === "complete" && !task.shippedAt) {
+      task.shippedAt = new Date().toISOString();
+    }
+
     // Add to target column
     columns[toColumnIndex].tasks.push(task);
     

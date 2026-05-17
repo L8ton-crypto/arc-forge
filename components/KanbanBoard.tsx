@@ -162,8 +162,14 @@ export default function KanbanBoard() {
 
         if (!task) return prev;
 
+        // Mirror server auto-stamp: first-time landing in complete records shippedAt.
+        let stampedTask: Task = task;
+        if (targetColId === "complete" && !stampedTask.shippedAt) {
+          stampedTask = { ...stampedTask, shippedAt: new Date().toISOString() };
+        }
+
         return newCols.map((col) =>
-          col.id === targetColId ? { ...col, tasks: [...col.tasks, task!] } : col
+          col.id === targetColId ? { ...col, tasks: [...col.tasks, stampedTask] } : col
         );
       });
 
@@ -213,23 +219,21 @@ export default function KanbanBoard() {
 
       if (!task) return prev;
 
+      // Mirror server auto-stamp: first-time landing in complete records shippedAt.
+      let stampedTask: Task = task;
+      if (targetColId === "complete" && !stampedTask.shippedAt) {
+        stampedTask = { ...stampedTask, shippedAt: new Date().toISOString() };
+      }
+
       return newCols.map((col) =>
-        col.id === targetColId ? { ...col, tasks: [...col.tasks, task!] } : col
+        col.id === targetColId ? { ...col, tasks: [...col.tasks, stampedTask] } : col
       );
     });
   }, []);
 
   const handleAddTask = useCallback(
     (
-      taskData: {
-        title: string;
-        description: string;
-        priority: "high" | "medium" | "low";
-        tags: string[];
-        estimatedHours?: number;
-        monetization?: string;
-        requirements?: string;
-      },
+      taskData: Omit<Task, "id" | "createdAt" | "updatedAt">,
       columnId: ColumnId
     ) => {
       const today = new Date().toISOString().split("T")[0];

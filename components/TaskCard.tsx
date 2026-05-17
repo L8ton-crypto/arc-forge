@@ -1,6 +1,6 @@
 "use client";
 
-import { Task, Priority } from "@/lib/types";
+import { Task, Priority, AUDIENCE_CONFIG } from "@/lib/types";
 
 const priorityColors: Record<Priority, string> = {
   high: "border-l-red-500",
@@ -23,6 +23,7 @@ interface TaskCardProps {
 export default function TaskCard({ task, onDragStart, onClick }: TaskCardProps) {
   const pColor = priorityColors[task.priority];
   const badge = priorityBadge[task.priority];
+  const audience = task.audience ? AUDIENCE_CONFIG[task.audience] : null;
 
   return (
     <div
@@ -43,6 +44,13 @@ export default function TaskCard({ task, onDragStart, onClick }: TaskCardProps) 
         {task.description}
       </p>
       <div className="flex flex-wrap gap-1">
+        {audience && (
+          <span
+            className={`text-[10px] px-1.5 py-0.5 rounded-full border ${audience.bg} ${audience.text} ${audience.border} font-medium`}
+          >
+            {audience.label}
+          </span>
+        )}
         {task.tags.map((tag) => (
           <span
             key={tag}
@@ -52,11 +60,23 @@ export default function TaskCard({ task, onDragStart, onClick }: TaskCardProps) 
           </span>
         ))}
       </div>
-      <div className="flex items-center justify-between mt-2">
+      <div className="flex items-center justify-between mt-2 gap-2 flex-wrap">
         {task.monetization && (
           <div className="text-[10px] text-emerald-400/80 flex items-center gap-1">
             <span>💰</span>
             <span>{task.monetization}</span>
+          </div>
+        )}
+        {task.oneNightScope && (
+          <div className="text-[10px] text-amber-400/80 flex items-center gap-1" title={task.oneNightScope}>
+            <span>🌙</span>
+            <span>1-night scope</span>
+          </div>
+        )}
+        {task.liveUrl && (
+          <div className="text-[10px] text-emerald-300 flex items-center gap-1">
+            <span>🟢</span>
+            <span>Live</span>
           </div>
         )}
         {task.requirements && (
