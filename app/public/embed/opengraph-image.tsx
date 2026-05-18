@@ -6,8 +6,9 @@ export const alt = "L8 autonomous pipeline — live shipped count";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-// Short cache so LinkedIn previews refresh. Edge cache 60s.
-export const revalidate = 60;
+// 1-hour edge cache. Public pipeline data changes a few times a week at most;
+// hourly OG freshness is plenty for LinkedIn/X/Slack previews and lets Neon sleep.
+export const revalidate = 3600;
 
 export default async function Image() {
   const flat = await fetchFlatTasks();
